@@ -17,7 +17,18 @@ export class SceneRenderer {
         // Two shaders: solid face coloring for meshes without UVs, texturing for those with them.
         this.solidShader = new ShaderProgram(gl, solidVertexSource, solidFragmentSource);
         this.textureShader = new ShaderProgram(gl, textureVertexSource, textureFragmentSource);
-        this.texture = Texture.createCheckerboard(gl);
+        // Named textures; each object selects one via its material, defaulting to "checker".
+        /** @type {Record<string, Texture>} */
+        this.textures = {
+            checker: Texture.createCheckerboard(gl),
+            brick: Texture.createBrick(gl),
+            stripes: Texture.createStripes(gl),
+        };
+        for (const object of objects) {
+            if (object.material !== null && !(object.material in this.textures)) {
+                throw new Error(`Unknown material: ${object.material}`);
+            }
+        }
         /** @type {Map<import("../loaders/OBJLoader.js").Geometry, IndexedMesh>} */
         this.meshes = new Map();
         for (const { geometry } of objects) {
@@ -36,7 +47,7 @@ export class SceneRenderer {
             if (object.geometry.uvs) {
                 this.textureShader.use();
                 this.textureShader.setMatrix4("uMVP", vp.multiply(object.model).data);
-                this.texture.bind(0);
+                this.textures[object.material ?? "checker"].bind(0);
                 this.textureShader.setInt("uTexture", 0);
             } else {
                 this.solidShader.use();
@@ -50,6 +61,6 @@ export class SceneRenderer {
         for (const mesh of this.meshes.values()) mesh.dispose();
         this.solidShader.dispose();
         this.textureShader.dispose();
-        this.texture.dispose();
+        for (const texture of Object.values(this.textures)) texture.dispose();
     }
 }
