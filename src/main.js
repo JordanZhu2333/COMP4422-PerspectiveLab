@@ -5,6 +5,7 @@ import { createWebGL2Context } from "./rendering/context.js";
 import { SceneRenderer } from "./rendering/SceneRenderer.js";
 import { CollisionWorld } from "./physics/CollisionWorld.js";
 import { loadCollisionScene } from "./scene/createCollisionScene.js";
+import { updateAnimation } from "./scene/updateAnimation.js";
 import { Keyboard } from "./input/Keyboard.js";
 import { MouseLook } from "./input/MouseLook.js";
 
@@ -35,12 +36,17 @@ resizeCanvas();
 
 /** @type {number | null} */
 let previousTime = null;
+/** @type {number} */
+let elapsedSeconds = 0;
 
-// 3. Update the camera and render each frame. Movement has no gravity.
+// 3. Animate the scene, then update the camera and render each frame.
 /** @param {number} timeMs */
 function render(timeMs) {
     const deltaSeconds = previousTime === null ? 0 : Math.min((timeMs - previousTime) / 1000, 0.05);
     previousTime = timeMs;
+    elapsedSeconds += deltaSeconds;
+    updateAnimation(scene.objects, elapsedSeconds);
+    world.rebuild();
     controller.update(deltaSeconds);
     renderer.draw(camera);
     requestAnimationFrame(render);
