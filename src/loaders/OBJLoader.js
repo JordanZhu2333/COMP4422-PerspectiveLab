@@ -1,6 +1,6 @@
 // @ts-check
 
-/** @typedef {{ positions: Float32Array, indices: Uint16Array }} Geometry */
+/** @typedef {{ positions: Float32Array, indices: Uint16Array, uvs?: Float32Array, normals?: Float32Array }} Geometry */
 
 /**
  * Parse OBJ text into position and triangle index arrays without network or GPU access.

@@ -5,18 +5,29 @@ export function createSphereGeometry() {
     const segments = 16;
     const latitudeSteps = 8;
     const positions = [0, 1, 0]; // One vertex at the north pole.
+    const uvs = [0.5, 0];         // The north pole collapses to a single UV point.
+    const normals = [0, 1, 0];    // Unit sphere: the normal equals the position.
     const indices = [];
 
     // Build latitude rings without duplicating seam vertices.
     for (let latitude = 1; latitude < latitudeSteps; latitude++) {
         const phi = Math.PI * latitude / latitudeSteps;
+        const v = phi / Math.PI;
         for (let longitude = 0; longitude < segments; longitude++) {
             const theta = 2 * Math.PI * longitude / segments;
-            positions.push(Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta));
+            const u = theta / (2 * Math.PI);
+            const x = Math.sin(phi) * Math.cos(theta);
+            const y = Math.cos(phi);
+            const z = Math.sin(phi) * Math.sin(theta);
+            positions.push(x, y, z);
+            uvs.push(u, v);
+            normals.push(x, y, z); // Unit sphere: the normal equals the position.
         }
     }
     const southPole = positions.length / 3;
     positions.push(0, -1, 0);
+    uvs.push(0.5, 1);
+    normals.push(0, -1, 0);
 
     for (let longitude = 0; longitude < segments; longitude++) {
         const next = (longitude + 1) % segments;
@@ -39,5 +50,7 @@ export function createSphereGeometry() {
     return {
         positions: new Float32Array(positions),
         indices: new Uint16Array(indices),
+        uvs: new Float32Array(uvs),
+        normals: new Float32Array(normals),
     };
 }

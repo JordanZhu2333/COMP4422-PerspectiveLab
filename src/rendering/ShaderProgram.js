@@ -22,12 +22,11 @@ export class ShaderProgram {
     }
 
     /**
-     * Upload a column-major 4x4 matrix after calling use().
-     * Accept the underlying array without depending on the Mat4 implementation.
-     * @param {string} name GLSL uniform name, such as uMVP.
-     * @param {Float32Array} data 16 column-major matrix elements.
+     * Resolve and cache a uniform location, throwing when the uniform is inactive.
+     * @param {string} name GLSL uniform name.
+     * @returns {WebGLUniformLocation}
      */
-    setMatrix4(name, data) {
+    getUniformLocation(name) {
         let location = this.uniformLocations.get(name);
         if (location === undefined) {
             const found = this.gl.getUniformLocation(this.program, name);
@@ -37,7 +36,26 @@ export class ShaderProgram {
             location = found;
             this.uniformLocations.set(name, location);
         }
-        this.gl.uniformMatrix4fv(location, false, data);
+        return location;
+    }
+
+    /**
+     * Upload a column-major 4x4 matrix after calling use().
+     * Accept the underlying array without depending on the Mat4 implementation.
+     * @param {string} name GLSL uniform name, such as uMVP.
+     * @param {Float32Array} data 16 column-major matrix elements.
+     */
+    setMatrix4(name, data) {
+        this.gl.uniformMatrix4fv(this.getUniformLocation(name), false, data);
+    }
+
+    /**
+     * Upload an integer uniform (such as a sampler's texture unit) after calling use().
+     * @param {string} name GLSL uniform name, such as uTexture.
+     * @param {number} value Integer value.
+     */
+    setInt(name, value) {
+        this.gl.uniform1i(this.getUniformLocation(name), value);
     }
 
     /** Release resources when the program is no longer needed. */
