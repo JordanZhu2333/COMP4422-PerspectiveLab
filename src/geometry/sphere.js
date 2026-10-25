@@ -4,6 +4,7 @@
 export function createSphereGeometry() {
     const segments = 16;
     const latitudeSteps = 8;
+    const ringVertices = segments + 1; // One extra column closes the UV seam at u = 1.
     const positions = [0, 1, 0]; // One vertex at the north pole.
     const uvs = [0.5, 0];         // The north pole collapses to a single UV point.
     const normals = [0, 1, 0];    // Unit sphere: the normal equals the position.
@@ -13,9 +14,11 @@ export function createSphereGeometry() {
     for (let latitude = 1; latitude < latitudeSteps; latitude++) {
         const phi = Math.PI * latitude / latitudeSteps;
         const v = phi / Math.PI;
-        for (let longitude = 0; longitude < segments; longitude++) {
+        // Run one column past the seam so u reaches 1 and the last strip
+        // interpolates cleanly instead of stretching the whole texture across it.
+        for (let longitude = 0; longitude <= segments; longitude++) {
             const theta = 2 * Math.PI * longitude / segments;
-            const u = theta / (2 * Math.PI);
+            const u = longitude / segments;
             const x = Math.sin(phi) * Math.cos(theta);
             const y = Math.cos(phi);
             const z = Math.sin(phi) * Math.sin(theta);
@@ -30,22 +33,21 @@ export function createSphereGeometry() {
     normals.push(0, -1, 0);
 
     for (let longitude = 0; longitude < segments; longitude++) {
-        const next = (longitude + 1) % segments;
         // Connect the north pole to the first ring with outward winding.
-        indices.push(0, 1 + next, 1 + longitude);
+        indices.push(0, 1 + longitude + 1, 1 + longitude);
 
         // Split each quad between adjacent rings into two triangles.
         for (let ring = 0; ring < latitudeSteps - 2; ring++) {
-            const a = 1 + ring * segments + longitude;
-            const b = 1 + ring * segments + next;
-            const c = a + segments;
-            const d = b + segments;
+            const a = 1 + ring * ringVertices + longitude;
+            const b = a + 1;
+            const c = a + ringVertices;
+            const d = b + ringVertices;
             indices.push(a, b, c, b, d, c);
         }
 
         // Connect the last ring to the south pole without degenerate triangles.
-        const lastRing = 1 + (latitudeSteps - 2) * segments;
-        indices.push(southPole, lastRing + longitude, lastRing + next);
+        const lastRing = 1 + (latitudeSteps - 2) * ringVertices;
+        indices.push(southPole, lastRing + longitude, lastRing + longitude + 1);
     }
     return {
         positions: new Float32Array(positions),
