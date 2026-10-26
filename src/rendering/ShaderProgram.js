@@ -58,6 +58,15 @@ export class ShaderProgram {
         this.gl.uniform1i(this.getUniformLocation(name), value);
     }
 
+    /**
+     * Upload a 4-component vector (such as a color) after calling use().
+     * @param {string} name GLSL uniform name, such as uColor.
+     * @param {number[] | Float32Array} value Four components.
+     */
+    setVec4(name, value) {
+        this.gl.uniform4fv(this.getUniformLocation(name), value);
+    }
+
     /** Release resources when the program is no longer needed. */
     dispose() {
         this.gl.deleteProgram(this.program);

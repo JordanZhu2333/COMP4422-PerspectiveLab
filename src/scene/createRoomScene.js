@@ -13,26 +13,40 @@ export function createRoomScene() {
     const objects = [];
     /** @param {string} name @param {Geometry} geometry @param {number[]} position
      * @param {number[]} scale @param {number} [yaw] @param {string} [material]
+     * @param {[number, number, number]} [color]
      */
-    function add(name, geometry, position, scale, yaw = 0, material = null) {
+    function add(name, geometry, position, scale, yaw = 0, material = null, color = null) {
         const basePosition = new Vec3(position[0], position[1], position[2]);
         const baseScale = new Vec3(scale[0], scale[1], scale[2]);
         objects.push({ name, geometry,
-            basePosition, baseYaw: yaw, baseScale, animation: null, material,
+            basePosition, baseYaw: yaw, baseScale, animation: null, material, color,
             model: Mat4.trs(basePosition, new Vec3(0, yaw, 0), baseScale),
         });
     }
     // Room shell: floor, ceiling, and four walls.
-    add("Ground", createBoxGeometry(), [0, -0.5, 0], [16, 1, 16], 0, "checker");
-    add("Ceiling", createBoxGeometry(), [0, 8.5, 0], [16, 1, 16], 0, "brick");
-    add("BackWall", createBoxGeometry(), [0, 4, -8], [16, 8, 0.5], 0, "brick");
-    add("FrontWall", createBoxGeometry(), [0, 4, 8], [16, 8, 0.5], 0, "brick");
-    add("LeftWall", createBoxGeometry(), [-8, 4, 0], [0.5, 8, 16], 0, "brick");
-    add("RightWall", createBoxGeometry(), [8, 4, 0], [0.5, 8, 16], 0, "brick");
+    add("Ground", createBoxGeometry(), [0, -0.5, 0], [16, 1, 16], 0, null, [0.50, 0.64, 0.53]);
+    add("Ceiling", createBoxGeometry(), [0, 8.5, 0], [16, 1, 16], 0, null, [0.827, 0.827, 0.827]);
+    add("BackWall", createBoxGeometry(), [0, 4, -8], [16, 8, 0.5], 0, null, [0.961, 0.902, 0.784]);
+    add("FrontWall", createBoxGeometry(), [0, 4, 8], [16, 8, 0.5], 0, null, [0.961, 0.902, 0.784]);
+    add("LeftWall", createBoxGeometry(), [-8, 4, 0], [0.5, 8, 16], 0, null, [0.961, 0.902, 0.784]);
+    add("RightWall", createBoxGeometry(), [8, 4, 0], [0.5, 8, 16], 0, null, [0.961, 0.902, 0.784]);
+    // Room edges: silver trim lines separating the six faces.
+    add("CornerBL", createBoxGeometry(), [-7.75, 4, -7.75], [0.12, 8, 0.12], 0, null, [0.75, 0.75, 0.78]);
+    add("CornerBR", createBoxGeometry(), [7.75, 4, -7.75], [0.12, 8, 0.12], 0, null, [0.75, 0.75, 0.78]);
+    add("CornerFL", createBoxGeometry(), [-7.75, 4, 7.75], [0.12, 8, 0.12], 0, null, [0.75, 0.75, 0.78]);
+    add("CornerFR", createBoxGeometry(), [7.75, 4, 7.75], [0.12, 8, 0.12], 0, null, [0.75, 0.75, 0.78]);
+    add("TopBack", createBoxGeometry(), [0, 7.92, -7.75], [16, 0.15, 0.08], 0, null, [0.75, 0.75, 0.78]);
+    add("TopFront", createBoxGeometry(), [0, 7.92, 7.75], [16, 0.15, 0.08], 0, null, [0.75, 0.75, 0.78]);
+    add("TopLeft", createBoxGeometry(), [-7.75, 7.92, 0], [0.08, 0.15, 16], 0, null, [0.75, 0.75, 0.78]);
+    add("TopRight", createBoxGeometry(), [7.75, 7.92, 0], [0.08, 0.15, 16], 0, null, [0.75, 0.75, 0.78]);
+    add("SkirtBack", createBoxGeometry(), [0, 0.075, -7.75], [16, 0.15, 0.05], 0, null, [0.75, 0.75, 0.78]);
+    add("SkirtFront", createBoxGeometry(), [0, 0.075, 7.75], [16, 0.15, 0.05], 0, null, [0.75, 0.75, 0.78]);
+    add("SkirtLeft", createBoxGeometry(), [-7.75, 0.075, 0], [0.05, 0.15, 16], 0, null, [0.75, 0.75, 0.78]);
+    add("SkirtRight", createBoxGeometry(), [7.75, 0.075, 0], [0.05, 0.15, 16], 0, null, [0.75, 0.75, 0.78]);
     // Pickable props for the perspective illusion.
-    add("Crate1", createBoxGeometry(), [-3, 0.5, -2], [2, 1, 2], 0, "stripes");
+    add("Crate1", createBoxGeometry(), [-3, 0.5, -2], [2, 1, 2], 0, "fabric");
     add("Crate2", createBoxGeometry(), [2, 0.5, 1], [1, 1, 1], 0, "stripes");
-    add("Ball", createSphereGeometry(), [0, 0.5, 3], [1, 1, 1], 0, "checker");
+    add("Ball", createSphereGeometry(), [0, 0.5, 3], [1, 1, 1], 0, "fabric");
     return {
         objects,
         spawn: new Vec3(0, 2, 5),

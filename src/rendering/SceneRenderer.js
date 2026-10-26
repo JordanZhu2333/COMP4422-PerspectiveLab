@@ -5,16 +5,19 @@ import { Texture } from "./Texture.js";
 import { clearFrame } from "./context.js";
 import { vertexSource as solidVertexSource, fragmentSource as solidFragmentSource } from "../shaders/solidColor.js";
 import { vertexSource as textureVertexSource, fragmentSource as textureFragmentSource } from "../shaders/texture.js";
+import { vertexSource as flatVertexSource, fragmentSource as flatFragmentSource } from "../shaders/flatColor.js";
 
 /** Own GPU resources while sharing each object's model matrix with collision. */
 export class SceneRenderer {
     /** @param {WebGL2RenderingContext} gl
      * @param {import("../scene/createCollisionScene.js").SceneObject[]} objects
+     * @param {Record<string, Texture>} [imageTextures] Image-based textures to merge in.
      */
-    constructor(gl, objects) {
+    constructor(gl, objects, imageTextures = {}) {
         this.gl = gl;
         this.objects = objects;
-        // Two shaders: solid face coloring for meshes without UVs, texturing for those with them.
+        // Three shaders: flat color, solid face coloring, and texturing.
+        this.flatShader = new ShaderProgram(gl, flatVertexSource, flatFragmentSource);
         this.solidShader = new ShaderProgram(gl, solidVertexSource, solidFragmentSource);
         this.textureShader = new ShaderProgram(gl, textureVertexSource, textureFragmentSource);
         // Named textures; each object selects one via its material, defaulting to "checker".
@@ -23,6 +26,7 @@ export class SceneRenderer {
             checker: Texture.createCheckerboard(gl),
             brick: Texture.createBrick(gl),
             stripes: Texture.createStripes(gl),
+            ...imageTextures,
         };
         for (const object of objects) {
             if (object.material !== null && !(object.material in this.textures)) {
@@ -44,7 +48,11 @@ export class SceneRenderer {
         clearFrame(this.gl, 0.075, 0.11, 0.15, 1);
         for (const object of this.objects) {
             const mesh = this.meshes.get(object.geometry);
-            if (object.geometry.uvs) {
+            if (object.color) {
+                this.flatShader.use();
+                this.flatShader.setMatrix4("uMVP", vp.multiply(object.model).data);
+                this.flatShader.setVec4("uColor", [object.color[0], object.color[1], object.color[2], 1]);
+            } else if (object.geometry.uvs) {
                 this.textureShader.use();
                 this.textureShader.setMatrix4("uMVP", vp.multiply(object.model).data);
                 this.textures[object.material ?? "checker"].bind(0);
@@ -59,6 +67,7 @@ export class SceneRenderer {
 
     dispose() {
         for (const mesh of this.meshes.values()) mesh.dispose();
+        this.flatShader.dispose();
         this.solidShader.dispose();
         this.textureShader.dispose();
         for (const texture of Object.values(this.textures)) texture.dispose();

@@ -7,6 +7,7 @@ import { CollisionWorld } from "./physics/CollisionWorld.js";
 import { loadCollisionScene } from "./scene/createCollisionScene.js";
 import { createRoomScene } from "./scene/createRoomScene.js";
 import { updateAnimation } from "./scene/updateAnimation.js";
+import { loadImageTextures } from "./loaders/TextureLoader.js";
 import { Keyboard } from "./input/Keyboard.js";
 import { MouseLook } from "./input/MouseLook.js";
 
@@ -15,10 +16,11 @@ const canvas = document.getElementById("glCanvas");
 if (!(canvas instanceof HTMLCanvasElement)) throw new Error("Scene canvas is missing.");
 const controls = document.getElementById("controls");
 if (!(controls instanceof HTMLElement)) throw new Error("Controls element is missing.");
-const scene = createRoomScene(); // M3 room scene (superliminal).
-// const scene = await loadCollisionScene(); // M1 scene: switch back to this line.
+//const scene = await loadCollisionScene(); // M1 scene (collision).
+const scene = createRoomScene(); // M3 room scene: switch back to this line.
 const gl = createWebGL2Context("glCanvas");
-const renderer = new SceneRenderer(gl, scene.objects);
+const imageTextures = await loadImageTextures(gl);
+const renderer = new SceneRenderer(gl, scene.objects, imageTextures);
 const world = new CollisionWorld(scene.objects);
 
 // 2. The camera stores viewing parameters; the controller handles input and collision.

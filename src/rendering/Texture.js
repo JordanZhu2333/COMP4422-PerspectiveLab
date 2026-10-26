@@ -147,6 +147,19 @@ export class Texture {
         }
         return new Texture(gl, canvas);
     }
+
+    /**
+     * Load a texture from an image file, awaiting the image decode.
+     * @param {WebGL2RenderingContext} gl
+     * @param {string | URL} url Image file URL.
+     * @returns {Promise<Texture>}
+     */
+    static async loadTexture(gl, url) {
+        const image = new Image();
+        image.src = url instanceof URL ? url.href : url;
+        await image.decode();
+        return new Texture(gl, image);
+    }
 }
 
 /**
