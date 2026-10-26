@@ -5,7 +5,7 @@ import { createWebGL2Context } from "./rendering/context.js";
 import { SceneRenderer } from "./rendering/SceneRenderer.js";
 import { CollisionWorld } from "./physics/CollisionWorld.js";
 import { loadCollisionScene } from "./scene/createCollisionScene.js";
-import { createRoomScene } from "./scene/createRoomScene.js";
+import { loadRoomScene } from "./scene/createRoomScene.js";
 import { updateAnimation } from "./scene/updateAnimation.js";
 import { loadImageTextures } from "./loaders/TextureLoader.js";
 import { Keyboard } from "./input/Keyboard.js";
@@ -17,7 +17,7 @@ if (!(canvas instanceof HTMLCanvasElement)) throw new Error("Scene canvas is mis
 const controls = document.getElementById("controls");
 if (!(controls instanceof HTMLElement)) throw new Error("Controls element is missing.");
 //const scene = await loadCollisionScene(); // M1 scene (collision).
-const scene = createRoomScene(); // M3 room scene: switch back to this line.
+const scene = await loadRoomScene(); // M3 room scene: switch back to this line.
 const gl = createWebGL2Context("glCanvas");
 const imageTextures = await loadImageTextures(gl);
 const renderer = new SceneRenderer(gl, scene.objects, imageTextures);

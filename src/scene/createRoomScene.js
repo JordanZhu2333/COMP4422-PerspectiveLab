@@ -1,14 +1,23 @@
 // @ts-check
 import { Mat4 } from "../math/Mat4.js";
 import { Vec3 } from "../math/Vec3.js";
+import { loadOBJ } from "../loaders/OBJLoader.js";
 import { createBoxGeometry } from "../geometry/box.js";
 import { createSphereGeometry } from "../geometry/sphere.js";
 
 /** @typedef {import("./createCollisionScene.js").SceneObject} SceneObject */
 /** @typedef {import("../loaders/OBJLoader.js").Geometry} Geometry */
 
-/** Build a closed room for the superliminal perspective effect and its initial camera pose. */
-export function createRoomScene() {
+/** Load the chess pawn OBJ and build the superliminal room. */
+export async function loadRoomScene() {
+    const pawn = await loadOBJ(new URL("../../assets/models/chess_pawn.obj", import.meta.url));
+    return createRoomScene(pawn);
+}
+
+/** Build a closed room for the superliminal perspective effect and its initial camera pose.
+ * @param {Geometry} pawn Loaded chess pawn geometry.
+ */
+export function createRoomScene(pawn) {
     /** @type {SceneObject[]} */
     const objects = [];
     /** @param {string} name @param {Geometry} geometry @param {number[]} position
@@ -43,10 +52,16 @@ export function createRoomScene() {
     add("SkirtFront", createBoxGeometry(), [0, 0.075, 7.75], [16, 0.15, 0.05], 0, null, [0.75, 0.75, 0.78]);
     add("SkirtLeft", createBoxGeometry(), [-7.75, 0.075, 0], [0.05, 0.15, 16], 0, null, [0.75, 0.75, 0.78]);
     add("SkirtRight", createBoxGeometry(), [7.75, 0.075, 0], [0.05, 0.15, 16], 0, null, [0.75, 0.75, 0.78]);
+    // Chess table: base, pillar, tabletop, board, and a pawn.
+    add("Base", createBoxGeometry(), [0, 0.15, -3], [3, 0.3, 3], 0, "brick");
+    add("Pillar", createBoxGeometry(), [0, 1.05, -3], [0.5, 1.5, 0.5], 0, "brick");
+    add("Tabletop", createBoxGeometry(), [0, 1.9, -3], [3.5, 0.2, 3.5], 0, "brick");
+    add("Board", createBoxGeometry(), [0, 2.025, -3], [3.2, 0.05, 3.2], 0, "checker");
+    add("Pawn", pawn, [0, 2.05, -3], [1.5, 1.5, 1.5], 0, null, [1, 0.7, 0.75]);
     // Pickable props for the perspective illusion.
     add("Crate1", createBoxGeometry(), [-3, 0.5, -2], [2, 1, 2], 0, "fabric");
     add("Crate2", createBoxGeometry(), [2, 0.5, 1], [1, 1, 1], 0, "stripes");
-    add("Ball", createSphereGeometry(), [0, 0.5, 3], [1, 1, 1], 0, "fabric");
+    add("Ball", createSphereGeometry(), [0, 0.5, 3], [1, 1, 1], 0, "checker");
     return {
         objects,
         spawn: new Vec3(0, 2, 5),
