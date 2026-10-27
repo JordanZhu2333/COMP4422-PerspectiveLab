@@ -138,10 +138,12 @@ export function parseOBJ(text) {
         throw new Error("OBJ contains no drawable triangles.");
     }
     // Reject partially-mapped meshes before they misalign the parallel arrays.
-    if (outUvs.length !== 0 && outUvs.length !== outPositions.length) {
+    // Compare vertex counts: UVs hold 2 floats/vertex and normals 3 floats/vertex.
+    const vertexCount = outPositions.length / 3;
+    if (outUvs.length !== 0 && outUvs.length / 2 !== vertexCount) {
         throw new Error("Inconsistent OBJ: some face corners reference texture coordinates while others do not.");
     }
-    if (outNormals.length !== 0 && outNormals.length !== outPositions.length) {
+    if (outNormals.length !== 0 && outNormals.length / 3 !== vertexCount) {
         throw new Error("Inconsistent OBJ: some face corners reference normals while others do not.");
     }
     /** @type {Geometry} */
