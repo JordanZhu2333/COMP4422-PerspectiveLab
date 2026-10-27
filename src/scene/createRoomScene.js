@@ -33,38 +33,36 @@ export function createRoomScene(pawn, fireplace) {
     function add(name, geometry, position, scale, yaw = 0, material = null, color = null, parent = root) {
         return addObject(parent, name, geometry, position, scale, yaw, null, material, color);
     }
-    // Room shell: floor, ceiling, and four walls.
-    add("Ground", createBoxGeometry(), [0, -0.5, 0], [16, 1, 16], 0, null, roomPalette.ground);
-    add("Ceiling", createBoxGeometry(), [0, 8.5, 0], [16, 1, 16], 0, null, roomPalette.ceiling);
-    add("BackWall", createBoxGeometry(), [0, 4, -8], [16, 8, 0.5], 0, null, roomPalette.wall);
-    add("FrontWall", createBoxGeometry(), [0, 4, 8], [16, 8, 0.5], 0, null, roomPalette.wall);
-    add("LeftWall", createBoxGeometry(), [-8, 4, 0], [0.5, 8, 16], 0, null, roomPalette.wall);
-    add("RightWall", createBoxGeometry(), [8, 4, 0], [0.5, 8, 16], 0, null, roomPalette.wall);
+    // Room shell: floor and four walls.
+    add("Ground", createBoxGeometry(16, 1, 16), [0, -0.5, 0], [1, 1, 1], 0, null, roomPalette.ground);
+    add("BackWall", createBoxGeometry(16, 8, 0.5), [0, 4, -8], [1, 1, 1], 0, null, roomPalette.wall);
+    add("FrontWall", createBoxGeometry(16, 8, 0.5), [0, 4, 8], [1, 1, 1], 0, null, roomPalette.wall);
+    add("LeftWall", createBoxGeometry(0.5, 8, 16), [-8, 4, 0], [1, 1, 1], 0, null, roomPalette.wall);
+    add("RightWall", createBoxGeometry(0.5, 8, 16), [8, 4, 0], [1, 1, 1], 0, null, roomPalette.wall);
     // Room edges: silver trim lines separating the six faces.
-    add("CornerBL", createBoxGeometry(), [-7.75, 4, -7.75], [0.12, 8, 0.12], 0, null, roomPalette.trim);
-    add("CornerBR", createBoxGeometry(), [7.75, 4, -7.75], [0.12, 8, 0.12], 0, null, roomPalette.trim);
-    add("CornerFL", createBoxGeometry(), [-7.75, 4, 7.75], [0.12, 8, 0.12], 0, null, roomPalette.trim);
-    add("CornerFR", createBoxGeometry(), [7.75, 4, 7.75], [0.12, 8, 0.12], 0, null, roomPalette.trim);
-    add("TopBack", createBoxGeometry(), [0, 7.92, -7.75], [16, 0.15, 0.08], 0, null, roomPalette.trim);
-    add("TopFront", createBoxGeometry(), [0, 7.92, 7.75], [16, 0.15, 0.08], 0, null, roomPalette.trim);
-    add("TopLeft", createBoxGeometry(), [-7.75, 7.92, 0], [0.08, 0.15, 16], 0, null, roomPalette.trim);
-    add("TopRight", createBoxGeometry(), [7.75, 7.92, 0], [0.08, 0.15, 16], 0, null, roomPalette.trim);
-    add("SkirtBack", createBoxGeometry(), [0, 0.075, -7.75], [16, 0.15, 0.05], 0, null, roomPalette.trim);
-    add("SkirtFront", createBoxGeometry(), [0, 0.075, 7.75], [16, 0.15, 0.05], 0, null, roomPalette.trim);
-    add("SkirtLeft", createBoxGeometry(), [-7.75, 0.075, 0], [0.05, 0.15, 16], 0, null, roomPalette.trim);
-    add("SkirtRight", createBoxGeometry(), [7.75, 0.075, 0], [0.05, 0.15, 16], 0, null, roomPalette.trim);
-    // Chess table: one group node holds its five pieces as children. The pieces
-    // stay siblings (not nested under one another) because the tabletop and board
-    // carry non-uniform scales that would distort a child's position.
+    add("CornerBL", createBoxGeometry(0.12, 8, 0.12), [-7.75, 4, -7.75], [1, 1, 1], 0, null, roomPalette.trim);
+    add("CornerBR", createBoxGeometry(0.12, 8, 0.12), [7.75, 4, -7.75], [1, 1, 1], 0, null, roomPalette.trim);
+    add("CornerFL", createBoxGeometry(0.12, 8, 0.12), [-7.75, 4, 7.75], [1, 1, 1], 0, null, roomPalette.trim);
+    add("CornerFR", createBoxGeometry(0.12, 8, 0.12), [7.75, 4, 7.75], [1, 1, 1], 0, null, roomPalette.trim);
+    add("TopBack", createBoxGeometry(16, 0.15, 0.08), [0, 7.92, -7.75], [1, 1, 1], 0, null, roomPalette.trim);
+    add("TopFront", createBoxGeometry(16, 0.15, 0.08), [0, 7.92, 7.75], [1, 1, 1], 0, null, roomPalette.trim);
+    add("TopLeft", createBoxGeometry(0.08, 0.15, 16), [-7.75, 7.92, 0], [1, 1, 1], 0, null, roomPalette.trim);
+    add("TopRight", createBoxGeometry(0.08, 0.15, 16), [7.75, 7.92, 0], [1, 1, 1], 0, null, roomPalette.trim);
+    add("SkirtBack", createBoxGeometry(16, 0.15, 0.05), [0, 0.075, -7.75], [1, 1, 1], 0, null, roomPalette.trim);
+    add("SkirtFront", createBoxGeometry(16, 0.15, 0.05), [0, 0.075, 7.75], [1, 1, 1], 0, null, roomPalette.trim);
+    add("SkirtLeft", createBoxGeometry(0.05, 0.15, 16), [-7.75, 0.075, 0], [1, 1, 1], 0, null, roomPalette.trim);
+    add("SkirtRight", createBoxGeometry(0.05, 0.15, 16), [7.75, 0.075, 0], [1, 1, 1], 0, null, roomPalette.trim);
+    // Chess table: one group node holds its five pieces as children.
     const table = add("Table", null, [0, 0, -3], [1, 1, 1]);
-    add("Base", createBoxGeometry(), [0, 0.15, 0], [3, 0.3, 3], 0, "marble", null, table);
-    add("Pillar", createBoxGeometry(), [0, 1.05, 0], [0.5, 1.5, 0.5], 0, "marble", null, table);
-    add("Tabletop", createBoxGeometry(), [0, 1.9, 0], [3.5, 0.2, 3.5], 0, "marble", null, table);
-    add("Board", createBoxGeometry(), [0, 2.025, 0], [3.2, 0.05, 3.2], 0, "checker", null, table);
+    add("Base", createBoxGeometry(3, 0.3, 3), [0, 0.15, 0], [1, 1, 1], 0, "marble", null, table);
+    add("Pillar", createBoxGeometry(0.5, 1.5, 0.5), [0, 1.05, 0], [1, 1, 1], 0, "marble", null, table);
+    add("Tabletop", createBoxGeometry(3.5, 0.2, 3.5), [0, 1.9, 0], [1, 1, 1], 0, "marble", null, table);
+    // Board: a unit top face maps the full 8x8 checker, then scales up to size.
+    add("Board", createBoxGeometry(1, 0.05, 1), [0, 2.025, 0], [3.2, 1, 3.2], 0, "checker", null, table);
     add("Pawn", pawn, [0, 2.05, 0], [1.5, 1.5, 1.5], 0, null, roomPalette.pawn, table);
     // Pickable props for the perspective illusion.
-    add("Crate1", createBoxGeometry(), [-3, 0.5, -2], [2, 1, 2], 0, "fabric");
-    add("Crate2", createBoxGeometry(), [2, 0.5, 1], [1, 1, 1], 0, "stripes");
+    add("Crate1", createBoxGeometry(2, 1, 2), [-3, 0.5, -2], [1, 1, 1], 0, "fabric");
+    add("Crate2", createBoxGeometry(1, 1, 1), [2, 0.5, 1], [1, 1, 1], 0, "stripes");
     add("Ball", createSphereGeometry(), [0, 0.5, 3], [1, 1, 1], 0, "checker");
     // Fireplace against the back wall.
     add("Fireplace", fireplace, [4, 0, -7.5], [1, 1, 1], 0, "marble");
