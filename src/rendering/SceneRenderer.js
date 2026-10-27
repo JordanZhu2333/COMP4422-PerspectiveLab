@@ -4,6 +4,7 @@ import { ShaderProgram } from "./ShaderProgram.js";
 import { Texture } from "./Texture.js";
 import { clearFrame } from "./context.js";
 import { collectRenderables } from "../scene/SceneGraph.js";
+import { roomPalette } from "../scene/colors.js";
 import { vertexSource as solidVertexSource, fragmentSource as solidFragmentSource } from "../shaders/solidColor.js";
 import { vertexSource as textureVertexSource, fragmentSource as textureFragmentSource } from "../shaders/texture.js";
 import { vertexSource as flatVertexSource, fragmentSource as flatFragmentSource } from "../shaders/flatColor.js";
@@ -46,7 +47,7 @@ export class SceneRenderer {
     /** @param {import("../camera/PerspectiveCamera.js").PerspectiveCamera} camera */
     draw(camera) {
         const vp = camera.getProjectionMatrix().multiply(camera.getViewMatrix());
-        clearFrame(this.gl, 0.075, 0.11, 0.15, 1);
+        clearFrame(this.gl, ...roomPalette.background, 1);
         for (const object of this.objects) {
             const mesh = this.meshes.get(object.geometry);
             if (object.color) {
