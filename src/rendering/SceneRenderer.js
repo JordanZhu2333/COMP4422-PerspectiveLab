@@ -3,19 +3,20 @@ import { IndexedMesh } from "./IndexedMesh.js";
 import { ShaderProgram } from "./ShaderProgram.js";
 import { Texture } from "./Texture.js";
 import { clearFrame } from "./context.js";
+import { collectRenderables } from "../scene/SceneGraph.js";
 import { vertexSource as solidVertexSource, fragmentSource as solidFragmentSource } from "../shaders/solidColor.js";
 import { vertexSource as textureVertexSource, fragmentSource as textureFragmentSource } from "../shaders/texture.js";
 import { vertexSource as flatVertexSource, fragmentSource as flatFragmentSource } from "../shaders/flatColor.js";
 
-/** Own GPU resources while sharing each object's model matrix with collision. */
+/** Own GPU resources and draw each renderable object using its world matrix. */
 export class SceneRenderer {
     /** @param {WebGL2RenderingContext} gl
-     * @param {import("../scene/createCollisionScene.js").SceneObject[]} objects
+     * @param {import("../types.js").SceneObject} root Scene graph root.
      * @param {Record<string, Texture>} [imageTextures] Image-based textures to merge in.
      */
-    constructor(gl, objects, imageTextures = {}) {
+    constructor(gl, root, imageTextures = {}) {
         this.gl = gl;
-        this.objects = objects;
+        this.objects = collectRenderables(root);
         // Three shaders: flat color, solid face coloring, and texturing.
         this.flatShader = new ShaderProgram(gl, flatVertexSource, flatFragmentSource);
         this.solidShader = new ShaderProgram(gl, solidVertexSource, solidFragmentSource);
@@ -28,14 +29,14 @@ export class SceneRenderer {
             stripes: Texture.createStripes(gl),
             ...imageTextures,
         };
-        for (const object of objects) {
+        for (const object of this.objects) {
             if (object.material !== null && !(object.material in this.textures)) {
                 throw new Error(`Unknown material: ${object.material}`);
             }
         }
-        /** @type {Map<import("../loaders/OBJLoader.js").Geometry, IndexedMesh>} */
+        /** @type {Map<import("../types.js").Geometry, IndexedMesh>} */
         this.meshes = new Map();
-        for (const { geometry } of objects) {
+        for (const { geometry } of this.objects) {
             if (!this.meshes.has(geometry)) {
                 this.meshes.set(geometry, new IndexedMesh(gl, geometry));
             }
@@ -50,16 +51,16 @@ export class SceneRenderer {
             const mesh = this.meshes.get(object.geometry);
             if (object.color) {
                 this.flatShader.use();
-                this.flatShader.setMatrix4("uMVP", vp.multiply(object.model).data);
+                this.flatShader.setMatrix4("uMVP", vp.multiply(object.world).data);
                 this.flatShader.setVec4("uColor", [object.color[0], object.color[1], object.color[2], 1]);
             } else if (object.geometry.uvs) {
                 this.textureShader.use();
-                this.textureShader.setMatrix4("uMVP", vp.multiply(object.model).data);
+                this.textureShader.setMatrix4("uMVP", vp.multiply(object.world).data);
                 this.textures[object.material ?? "checker"].bind(0);
                 this.textureShader.setInt("uTexture", 0);
             } else {
                 this.solidShader.use();
-                this.solidShader.setMatrix4("uMVP", vp.multiply(object.model).data);
+                this.solidShader.setMatrix4("uMVP", vp.multiply(object.world).data);
             }
             mesh?.draw();
         }

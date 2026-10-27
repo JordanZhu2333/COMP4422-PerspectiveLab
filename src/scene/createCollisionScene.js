@@ -1,14 +1,14 @@
 // @ts-check
-import { Mat4 } from "../math/Mat4.js";
 import { Vec3 } from "../math/Vec3.js";
 import { loadOBJ } from "../loaders/OBJLoader.js";
 import { createSphereGeometry } from "../geometry/sphere.js";
+import { createSceneObject, addObject } from "./SceneGraph.js";
 
-/** @typedef {import("../loaders/OBJLoader.js").Geometry} Geometry */
-/** @typedef {{ type: "spin" | "bob", speed: number, amplitude?: number }} Animation */
-/** @typedef {{ name: string, geometry: Geometry, model: Mat4, basePosition: Vec3, baseYaw: number, baseScale: Vec3, animation: Animation | null, material: string | null, color: [number, number, number] | null }} SceneObject */
+/** @typedef {import("../types.js").Geometry} Geometry */
+/** @typedef {import("../types.js").Animation} Animation */
+/** @typedef {import("../types.js").SceneObject} SceneObject */
 
-/** Load OBJ assets; rendering and collision share geometry and model matrices. */
+/** Load OBJ assets; rendering and collision share geometry and world matrices. */
 export async function loadCollisionScene() {
     const [box, pyramid] = await Promise.all([
         loadOBJ(new URL("../../assets/models/box.obj", import.meta.url)),
@@ -17,29 +17,24 @@ export async function loadCollisionScene() {
     return createCollisionScene(box, pyramid);
 }
 
-/** Build the scene objects and the initial camera pose.
+/** Build the scene graph and the initial camera pose.
  * @param {Geometry} box @param {Geometry} pyramid
  */
 export function createCollisionScene(box, pyramid) {
-    /** @type {SceneObject[]} */
-    const objects = [];
+    const root = createSceneObject("root", null, [0, 0, 0], [1, 1, 1]);
     /** @param {string} name @param {Geometry} geometry @param {number[]} position
-     * @param {number[]} scale @param {number} [yaw] @param {Animation} [animation]
-     * @param {string} [material] @param {[number, number, number]} [color]
+     * @param {number[]} scale @param {number} [yaw] @param {Animation | null} [animation]
+     * @param {string | null} [material] @param {[number, number, number] | null} [color]
+     * @param {SceneObject} [parent]
      */
-    function add(name, geometry, position, scale, yaw = 0, animation = null, material = null, color = null) {
-        const basePosition = new Vec3(position[0], position[1], position[2]);
-        const baseScale = new Vec3(scale[0], scale[1], scale[2]);
-        objects.push({ name, geometry,
-            basePosition, baseYaw: yaw, baseScale, animation, material, color,
-            model: Mat4.trs(basePosition, new Vec3(0, yaw, 0), baseScale),
-        });
+    function add(name, geometry, position, scale, yaw = 0, animation = null, material = null, color = null, parent = root) {
+        return addObject(parent, name, geometry, position, scale, yaw, animation, material, color);
     }
     add("Sphere", createSphereGeometry(), [-3.2, 1, 0], [1, 1, 1], 0, { type: "spin", speed: 0.8 });
     add("Pyramid", pyramid, [0, 1, 0], [2, 2, 2], Math.PI / 6, { type: "spin", speed: -0.6 });
     add("Cube", box, [3.2, 1, 0], [2, 2, 2], Math.PI / 6, { type: "bob", speed: 2, amplitude: 0.5 });
     return {
-        objects,
+        root,
         spawn: new Vec3(0, 3, 8),
         target: new Vec3(0, 1, 0),
     };

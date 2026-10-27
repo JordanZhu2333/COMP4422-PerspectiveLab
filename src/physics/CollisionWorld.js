@@ -2,17 +2,18 @@
 import { Vec3 } from "../math/Vec3.js";
 import { Vec4 } from "../math/Vec4.js";
 import { intersectsAxisSweep } from "./cylinderTriangle.js";
+import { collectRenderables } from "../scene/SceneGraph.js";
 
 /** @typedef {import("../math/Vec3.js").XYZ} XYZ */
-/** @typedef {{name: string, geometry: import("../loaders/OBJLoader.js").Geometry,
- * model: import("../math/Mat4.js").Mat4}} Collider */
+/** @typedef {import("../types.js").Renderable} Renderable */
 /** @typedef {{name:string, a:Vec3, b:Vec3, c:Vec3}} WorldTriangle */
 
 /** Check all triangles directly, without bounding volumes or an external physics library. */
 export class CollisionWorld {
-    /** @param {Collider[]} colliders */
-    constructor(colliders) {
-        this.colliders = colliders;
+    /** @param {import("../types.js").SceneObject} root Scene graph root. */
+    constructor(root) {
+        /** @type {Renderable[]} */
+        this.colliders = collectRenderables(root);
         /** @type {WorldTriangle[]} */
         this.triangles = [];
         this.triangleTests = 0;
@@ -20,18 +21,18 @@ export class CollisionWorld {
         this.rebuild();
     }
 
-    /** Cache world-space triangles; call again after changing a model matrix or geometry. */
+    /** Cache world-space triangles; call again after changing a world matrix or geometry. */
     rebuild() {
         this.triangles = [];
-        for (const { name, geometry, model } of this.colliders) {
-            const m = model.data;
+        for (const { name, geometry, world } of this.colliders) {
+            const m = world.data;
             if (m[3] !== 0 || m[7] !== 0 || m[11] !== 0 || m[15] !== 1) {
-                throw new RangeError("Collision requires an affine model matrix M.");
+                throw new RangeError("Collision requires an affine world matrix M.");
             }
             const { positions, indices } = geometry;
             const vertices = [];
             for (let i = 0; i < positions.length; i += 3) {
-                const p = model.transform(new Vec4(positions[i], positions[i + 1], positions[i + 2], 1));
+                const p = world.transform(new Vec4(positions[i], positions[i + 1], positions[i + 2], 1));
                 vertices.push(new Vec3(p.x, p.y, p.z));
             }
             for (let i = 0; i < indices.length; i += 3) {

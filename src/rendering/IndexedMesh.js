@@ -9,7 +9,7 @@
 export class IndexedMesh {
     /**
      * @param {WebGL2RenderingContext} gl
-     * @param {import("../loaders/OBJLoader.js").Geometry} geometry Vertex data and triangle indices.
+     * @param {import("../types.js").Geometry} geometry Vertex data and triangle indices.
      */
     constructor(gl, geometry) {
         const vao = gl.createVertexArray();

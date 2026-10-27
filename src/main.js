@@ -7,6 +7,7 @@ import { CollisionWorld } from "./physics/CollisionWorld.js";
 import { loadCollisionScene } from "./scene/createCollisionScene.js";
 import { loadRoomScene } from "./scene/createRoomScene.js";
 import { updateAnimation } from "./scene/updateAnimation.js";
+import { updateWorld } from "./scene/SceneGraph.js";
 import { loadImageTextures } from "./loaders/TextureLoader.js";
 import { Keyboard } from "./input/Keyboard.js";
 import { MouseLook } from "./input/MouseLook.js";
@@ -20,8 +21,8 @@ if (!(controls instanceof HTMLElement)) throw new Error("Controls element is mis
 const scene = await loadRoomScene(); // M3 room scene: switch back to this line.
 const gl = createWebGL2Context("glCanvas");
 const imageTextures = await loadImageTextures(gl);
-const renderer = new SceneRenderer(gl, scene.objects, imageTextures);
-const world = new CollisionWorld(scene.objects);
+const renderer = new SceneRenderer(gl, scene.root, imageTextures);
+const world = new CollisionWorld(scene.root);
 
 // 2. The camera stores viewing parameters; the controller handles input and collision.
 const camera = new PerspectiveCamera({ position: scene.spawn, target: scene.target, near: 0.06, far: 100 });
@@ -49,7 +50,8 @@ function render(timeMs) {
     const deltaSeconds = previousTime === null ? 0 : Math.min((timeMs - previousTime) / 1000, 0.05);
     previousTime = timeMs;
     elapsedSeconds += deltaSeconds;
-    updateAnimation(scene.objects, elapsedSeconds);
+    updateAnimation(scene.root, elapsedSeconds);
+    updateWorld(scene.root);
     world.rebuild();
     controller.update(deltaSeconds);
     renderer.draw(camera);
