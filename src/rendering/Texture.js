@@ -4,8 +4,8 @@
  * Manage a GPU texture: upload an image or canvas, configure sampling, and
  * bind it to a texture unit for a sampler uniform.
  *
- * Power-of-two images use mipmaps and repeat wrapping; non-power-of-two images
- * fall back to clamped, non-mipmapped sampling so the texture stays complete.
+ * WebGL2 supports mipmaps and repeat wrapping at any dimensions, so every
+ * texture uses linear mipmap sampling with REPEAT wrapping.
  */
 export class Texture {
     /**
@@ -24,18 +24,12 @@ export class Texture {
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
-        // Mipmaps require power-of-two dimensions; clamp non-power-of-two images.
-        const powerOfTwo = isPowerOfTwo(image.width) && isPowerOfTwo(image.height);
-        if (powerOfTwo) {
-            gl.generateMipmap(gl.TEXTURE_2D);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-        } else {
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        }
+        // WebGL2 supports mipmaps and repeat wrapping at any dimensions,
+        // including non-power-of-two images.
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
@@ -160,12 +154,4 @@ export class Texture {
         await image.decode();
         return new Texture(gl, image);
     }
-}
-
-/**
- * @param {number} value
- * @returns {boolean} True when value is a power of two, including 1.
- */
-function isPowerOfTwo(value) {
-    return (value & (value - 1)) === 0;
 }
