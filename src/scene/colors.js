@@ -21,9 +21,11 @@ export function hexToRgb(hex) {
 /** The room's color palette; hex strings are the source of truth for each color. */
 export const roomPalette = {
     background: hexToRgb("#a0aeb9"),
-    ground: hexToRgb("#ba8e9f"),
+    ground: hexToRgb("#B46F82"),
     ceiling: hexToRgb("#a0aeb9"),
     wall: hexToRgb("#e7bdc1"),
     trim: hexToRgb("#efaaa5"),
     pawn: hexToRgb("#dfdaa3"),
+    marblePink: hexToRgb("#e5829d"),
+    ballBlue: hexToRgb("#5f8fd6"),
 };

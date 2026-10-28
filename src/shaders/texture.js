@@ -24,11 +24,23 @@ precision highp float;
 in vec2 vTexCoord;
 
 uniform sampler2D uTexture;
+uniform vec4 uTint;
+uniform bool uTintEnabled;
 
 out vec4 outColor;
 
 void main() {
-    // Sample the texture at the interpolated UV coordinate.
-    outColor = texture(uTexture, vTexCoord);
+    vec4 tex = texture(uTexture, vTexCoord);
+    if (uTintEnabled) {
+        // Grayscale texture -> tint: remap the texture's brightness onto the
+        // tint's dark->bright range so mid-gray stays a saturated tint instead
+        // of a half-brightened one (which looked washed out).
+        float gray = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
+        vec3 dark = uTint.rgb * 0.25;
+        vec3 bright = uTint.rgb * 1.0;
+        outColor = vec4(mix(dark, bright, gray), 1.0);
+    } else {
+        outColor = tex * uTint;
+    }
 }
 `;

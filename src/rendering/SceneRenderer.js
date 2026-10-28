@@ -50,7 +50,7 @@ export class SceneRenderer {
         clearFrame(this.gl, ...roomPalette.background, 1);
         for (const object of this.objects) {
             const mesh = this.meshes.get(object.geometry);
-            if (object.color) {
+            if (object.color && !object.material) {
                 this.flatShader.use();
                 this.flatShader.setMatrix4("uMVP", vp.multiply(object.world).data);
                 this.flatShader.setVec4("uColor", [object.color[0], object.color[1], object.color[2], 1]);
@@ -59,6 +59,9 @@ export class SceneRenderer {
                 this.textureShader.setMatrix4("uMVP", vp.multiply(object.world).data);
                 this.textures[object.material ?? "checker"].bind(0);
                 this.textureShader.setInt("uTexture", 0);
+                this.textureShader.setInt("uTintEnabled", object.color ? 1 : 0);
+                const tint = object.color ?? [1, 1, 1];
+                this.textureShader.setVec4("uTint", [tint[0], tint[1], tint[2], 1]);
             } else {
                 this.solidShader.use();
                 this.solidShader.setMatrix4("uMVP", vp.multiply(object.world).data);

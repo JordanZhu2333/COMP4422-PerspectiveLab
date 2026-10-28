@@ -9,7 +9,7 @@
 
 /** @typedef {{ positions: Float32Array, indices: Uint16Array, uvs?: Float32Array, normals?: Float32Array }} Geometry */
 
-/** @typedef {{ type: "spin" | "bob", speed: number, amplitude?: number }} Animation */
+/** @typedef {{ type: "spin" | "bob" | "float" | "pulse", speed: number, amplitude?: number, amount?: number }} Animation */
 
 /**
  * A node in the scene graph. Every object keeps a local transform relative to

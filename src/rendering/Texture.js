@@ -65,7 +65,7 @@ export class Texture {
         const cellSize = size / cells;
         for (let y = 0; y < cells; y++) {
             for (let x = 0; x < cells; x++) {
-                ctx.fillStyle = (x + y) % 2 === 0 ? "#ffffff" : "#e7bdc1";
+                ctx.fillStyle = (x + y) % 2 === 0 ? "#ffffff" : "#a0aeb9";
                 ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
             }
         }
