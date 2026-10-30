@@ -36,8 +36,8 @@ void main() {
         // tint's dark->bright range so mid-gray stays a saturated tint instead
         // of a half-brightened one (which looked washed out).
         float gray = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
-        vec3 dark = uTint.rgb * 0.25;
-        vec3 bright = uTint.rgb * 1.0;
+        vec3 dark = uTint.rgb * 0.1;
+        vec3 bright = uTint.rgb * 1.5;
         outColor = vec4(mix(dark, bright, gray), 1.0);
     } else {
         outColor = tex * uTint;

@@ -17,15 +17,3 @@ export function hexToRgb(hex) {
         parseInt(value.slice(4, 6), 16) / 255,
     ];
 }
-
-/** The room's color palette; hex strings are the source of truth for each color. */
-export const roomPalette = {
-    background: hexToRgb("#a0aeb9"),
-    ground: hexToRgb("#B46F82"),
-    ceiling: hexToRgb("#a0aeb9"),
-    wall: hexToRgb("#e7bdc1"),
-    trim: hexToRgb("#efaaa5"),
-    pawn: hexToRgb("#dfdaa3"),
-    marblePink: hexToRgb("#e5829d"),
-    ballBlue: hexToRgb("#5f8fd6"),
-};

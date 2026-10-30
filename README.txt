@@ -1,16 +1,17 @@
-COMP4422 PerspectiveLab - Geometry and Camera (M1)
+COMP4422 PerspectiveLab - WebGL2 Scene (M1 + M2 complete, M3 pending)
 
-A raw WebGL2 scene with a procedural sphere, an OBJ pyramid, and an OBJ cube.
-The project uses its own Vec3/Mat4 library, indexed drawing, perspective MVP
-transforms, depth testing, and a controllable camera with triangle collision.
-The objects are static; requestAnimationFrame continuously redraws the scene.
+A raw WebGL2 renderer (no Three.js) with a scene graph, procedural and image
+textures with tinting, four animation types, a free-flight camera with triangle
+collision, and stubbed interaction for M3. M1 (geometry/camera/collision) and M2
+(shaders/textures/tinting/animation/scene graph) are complete; M3 (Blinn-Phong
+lighting and pick-and-scale interaction) is not yet implemented. See M3_HANDOFF.md.
 
 RUN
 Open this folder in VS Code and serve index.html with Live Preview.
 Alternatively, from this folder run:
     python -m http.server 3000 --bind 127.0.0.1
 Then open http://127.0.0.1:3000/index.html in a browser with WebGL2 support.
-Use an HTTP server: opening index.html through file:// will not load the OBJ files.
+Use an HTTP server: opening index.html through file:// will not load the assets.
 No package installation or build step is required.
 
 CONTROLS
@@ -22,18 +23,29 @@ Shift: move faster.
 Left-button drag or arrow keys: turn the camera.
 Refresh the page to return to the initial view.
 
+SCENES
+Pick the scene in src/main.js by choosing which loader to await:
+  loadCollisionScene()   M1 demo: a sphere, a pyramid, and a cube for camera + collision.
+  loadM2DemoScene()      M2 default: material/animation showcase on a vertical grid.
+  loadRoomScene()        M2 room: a chess table built from a five-child hierarchy.
+
 SOURCE
 src/main.js                 Initialization, window resizing, and the frame loop.
-src/math/                   Vec3, Vec4, and Mat4.
+src/types.js                Shared type contracts (JSDoc typedefs, no runtime values).
+src/math/                   Vec3, Vec4, and Mat4 (column-major).
+src/scenegraph/             Scene graph: nodes, hierarchy, world matrices, and animation.
+src/scene/                  Scene content built on top of scenegraph (the three scenes).
 src/camera/                 Perspective camera and free-flight controller.
 src/input/                  Keyboard state and mouse drag input.
-src/geometry/sphere.js      Indexed unit sphere generated in JavaScript.
-src/loaders/OBJLoader.js    OBJ text parsing and HTTP loading.
-src/scene/                  Object transforms and initial camera pose.
-src/rendering/              WebGL2 context, shader programs, buffers, and drawing.
-src/shaders/solidColor.js   Face-normal coloring from fragment derivatives.
+src/geometry/               Procedural unit sphere and box (positions, UVs, normals).
+src/loaders/                OBJ text parsing and image-texture loading.
+src/rendering/              WebGL2 context, shader programs, meshes, textures, drawing.
+src/shaders/                flatColor (tint), solidColor (face normals), texture (tint + sample).
 src/physics/                Upright cylinder collision against world triangles.
-assets/models/             Original box and pyramid OBJ meshes.
+src/interaction/            M3 stubs: ray casting and a pick-and-scale controller.
+src/util/                   Small helpers (hexToRgb).
+assets/models/              OBJ meshes.
+assets/textures/            Image textures (fabric, marble, metal, wood).
 
 CONVENTIONS AND SCOPE
 Matrices use column-major storage and column vectors: clip = P * V * M * point.
@@ -41,17 +53,32 @@ The world is right-handed with Y up. View space looks down -Z; NDC depth is [-1,
 The canvas follows the browser window, leaving space for the controls below.
 Drawing buffer dimensions use CSS pixels without an additional device-pixel ratio.
 
-The OBJ loader accepts three-component positions, triangular faces, positive
-indices, and relative negative indices. Face forms v, v/vt, v//vn, and v/vt/vn
-are accepted, but only position indices are used. UVs, stored normals, materials,
-and groups are skipped. Export triangulated meshes with at most 65535 positions.
+The scene graph stores a local transform per node (base position/yaw/scale plus
+an optional animation) and derives world matrices top-down each frame: world =
+parentWorld * local. Group nodes carry no geometry and only organize children.
+Each node applies only its own animation; children follow an animated parent's
+transform but do not inherit its animation spec. Animation types are spin, bob,
+float, and pulse (src/scenegraph/animation.js).
+
+Materials are checker and brick (procedural) and fabric, marble, metal, and wood
+(image textures). A flat color tints a texture; a solid mesh is shaded from its
+per-face normals. Normals are uploaded for OBJ meshes that define them and for
+procedural geometry, so M3 lighting can reuse the existing vertex attributes.
+
+The OBJ loader accepts three-component positions, texture coordinates, normals,
+and triangular faces. Face forms v, v/vt, v//vn, and v/vt/vn are accepted, with
+positive and relative-negative indices. UVs and normals are returned only when
+the file defines them; materials and groups are skipped. Export triangulated
+meshes with at most 65535 vertices.
 
 The camera uses a fixed upright cylinder and checks every world-space triangle.
 Movement is split into short axis sweeps with basic sliding. There is no gravity,
 jumping, automatic slope climbing, or recovery from starting inside an obstacle.
 Call CollisionWorld.rebuild() after changing a model matrix or mesh geometry.
-This version covers geometry and camera work; gameplay, texturing, and lighting
-are outside its current scope.
+
+M3 work is scoped and located in M3_HANDOFF.md: Blinn-Phong lighting (sockets in
+src/types.js, src/scenegraph/SceneGraph.js, src/rendering/SceneRenderer.js) and
+pick-and-scale interaction (stubs in src/interaction/).
 
 REFERENCES AND ASSISTANCE
 Course project brief:

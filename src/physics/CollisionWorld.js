@@ -2,7 +2,7 @@
 import { Vec3 } from "../math/Vec3.js";
 import { Vec4 } from "../math/Vec4.js";
 import { intersectsAxisSweep } from "./cylinderTriangle.js";
-import { collectRenderables } from "../scene/SceneGraph.js";
+import { collectRenderables } from "../scenegraph/SceneGraph.js";
 
 /** @typedef {import("../math/Vec3.js").XYZ} XYZ */
 /** @typedef {import("../types.js").Renderable} Renderable */
@@ -10,6 +10,9 @@ import { collectRenderables } from "../scene/SceneGraph.js";
 
 /** Check all triangles directly, without bounding volumes or an external physics library. */
 export class CollisionWorld {
+    // M3 (interaction): add a raycast() method (ray vs triangle) here, reusing
+    // this.triangles, to compute the farthest distance for the pick-and-scale
+    // feature. Skip the held object itself. See M3_HANDOFF.md.
     /** @param {import("../types.js").SceneObject} root Scene graph root. */
     constructor(root) {
         /** @type {Renderable[]} */

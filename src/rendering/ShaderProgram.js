@@ -67,6 +67,24 @@ export class ShaderProgram {
         this.gl.uniform4fv(this.getUniformLocation(name), value);
     }
 
+    /**
+     * Upload a 3-component vector (such as a light position or color) after calling use().
+     * @param {string} name GLSL uniform name, such as uLightPos.
+     * @param {number[] | Float32Array} value Three components.
+     */
+    setVec3(name, value) {
+        this.gl.uniform3fv(this.getUniformLocation(name), value);
+    }
+
+    /**
+     * Upload a single float (such as shininess or light intensity) after calling use().
+     * @param {string} name GLSL uniform name, such as uShininess.
+     * @param {number} value Scalar value.
+     */
+    setFloat(name, value) {
+        this.gl.uniform1f(this.getUniformLocation(name), value);
+    }
+
     /** Release resources when the program is no longer needed. */
     dispose() {
         this.gl.deleteProgram(this.program);

@@ -3,8 +3,7 @@ import { IndexedMesh } from "./IndexedMesh.js";
 import { ShaderProgram } from "./ShaderProgram.js";
 import { Texture } from "./Texture.js";
 import { clearFrame } from "./context.js";
-import { collectRenderables } from "../scene/SceneGraph.js";
-import { roomPalette } from "../scene/colors.js";
+import { collectRenderables } from "../scenegraph/SceneGraph.js";
 import { vertexSource as solidVertexSource, fragmentSource as solidFragmentSource } from "../shaders/solidColor.js";
 import { vertexSource as textureVertexSource, fragmentSource as textureFragmentSource } from "../shaders/texture.js";
 import { vertexSource as flatVertexSource, fragmentSource as flatFragmentSource } from "../shaders/flatColor.js";
@@ -12,12 +11,17 @@ import { vertexSource as flatVertexSource, fragmentSource as flatFragmentSource 
 /** Own GPU resources and draw each renderable object using its world matrix. */
 export class SceneRenderer {
     /** @param {WebGL2RenderingContext} gl
-     * @param {import("../types.js").SceneObject} root Scene graph root.
+     * @param {import("../types.js").Scene} scene Scene graph root, lights, and background.
      * @param {Record<string, Texture>} [imageTextures] Image-based textures to merge in.
      */
-    constructor(gl, root, imageTextures = {}) {
+    constructor(gl, scene, imageTextures = {}) {
         this.gl = gl;
-        this.objects = collectRenderables(root);
+        // M3 (lighting): upload scene.lights to the lit shader in draw().
+        // See M3_HANDOFF.md.
+        /** @type {import("../types.js").Light[]} */
+        this.lights = scene.lights;
+        this.background = scene.background;
+        this.objects = collectRenderables(scene.root);
         // Three shaders: flat color, solid face coloring, and texturing.
         this.flatShader = new ShaderProgram(gl, flatVertexSource, flatFragmentSource);
         this.solidShader = new ShaderProgram(gl, solidVertexSource, solidFragmentSource);
@@ -27,7 +31,6 @@ export class SceneRenderer {
         this.textures = {
             checker: Texture.createCheckerboard(gl),
             brick: Texture.createBrick(gl),
-            stripes: Texture.createStripes(gl),
             ...imageTextures,
         };
         for (const object of this.objects) {
@@ -47,7 +50,7 @@ export class SceneRenderer {
     /** @param {import("../camera/PerspectiveCamera.js").PerspectiveCamera} camera */
     draw(camera) {
         const vp = camera.getProjectionMatrix().multiply(camera.getViewMatrix());
-        clearFrame(this.gl, ...roomPalette.background, 1);
+        clearFrame(this.gl, ...this.background, 1);
         for (const object of this.objects) {
             const mesh = this.meshes.get(object.geometry);
             if (object.color && !object.material) {

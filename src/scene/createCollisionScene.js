@@ -2,7 +2,8 @@
 import { Vec3 } from "../math/Vec3.js";
 import { loadOBJ } from "../loaders/OBJLoader.js";
 import { createSphereGeometry } from "../geometry/sphere.js";
-import { createSceneObject, addObject } from "./SceneGraph.js";
+import { createSceneObject, addObject } from "../scenegraph/SceneGraph.js";
+import { hexToRgb } from "../util/color.js";
 
 /** @typedef {import("../types.js").Geometry} Geometry */
 /** @typedef {import("../types.js").Animation} Animation */
@@ -37,5 +38,7 @@ export function createCollisionScene(box, pyramid) {
         root,
         spawn: new Vec3(0, 3, 8),
         target: new Vec3(0, 1, 0),
+        background: hexToRgb("#131c26"),
+        lights: [], // M1 collision scene has no lighting.
     };
 }

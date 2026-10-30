@@ -1,6 +1,7 @@
 // @ts-check
 import { Mat4 } from "../math/Mat4.js";
 import { Vec3 } from "../math/Vec3.js";
+import { applyAnimation } from "./animation.js";
 
 /** @typedef {import("../types.js").SceneObject} SceneObject */
 /** @typedef {import("../types.js").Geometry} Geometry */
@@ -33,6 +34,10 @@ export function createSceneObject(name, geometry, position, scale, yaw = 0, anim
         animation,
         material,
         color,
+        specular: null,
+        shininess: 32,
+        interactable: false,
+        bounds: null,
         local: Mat4.trs(basePosition, new Vec3(0, yaw, 0), baseScale),
         world: new Mat4(),
     };
@@ -68,15 +73,23 @@ export function addObject(parent, name, geometry, position, scale, yaw = 0, anim
 }
 
 /**
- * Fill every node's world matrix from the root down: world = parentWorld * local.
- * Call after updating local transforms and before rendering or collision.
+ * Recompute each node's local matrix from its base transform (plus animation),
+ * then fill world matrices top-down: world = parentWorld * local. Call once per
+ * frame before rendering or collision. A node whose `animation` is null is
+ * "frozen" — its local equals its base transform (M3 interaction sets animation
+ * to null while holding an object).
  * @param {SceneObject} node
+ * @param {number} timeSeconds Accumulated elapsed frame time (animation phase).
  * @param {Mat4} [parentWorld]
  */
-export function updateWorld(node, parentWorld = Mat4.identity()) {
+export function updateWorld(node, timeSeconds, parentWorld = Mat4.identity()) {
+    const { position, yaw, scale } = node.animation
+        ? applyAnimation(node.animation, node.basePosition, node.baseYaw, node.baseScale, timeSeconds)
+        : { position: node.basePosition, yaw: node.baseYaw, scale: node.baseScale };
+    node.local = Mat4.trs(position, new Vec3(0, yaw, 0), scale);
     node.world = parentWorld.multiply(node.local);
     for (const child of node.children) {
-        updateWorld(child, node.world);
+        updateWorld(child, timeSeconds, node.world);
     }
 }
 

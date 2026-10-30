@@ -120,29 +120,6 @@ export class Texture {
     }
 
     /**
-     * Generate a striped texture entirely in code.
-     * @param {WebGL2RenderingContext} gl
-     * @param {number} [size=256] Width and height in pixels (power of two).
-     * @param {number} [stripes=8] Stripe count.
-     * @returns {Texture}
-     */
-    static createStripes(gl, size = 256, stripes = 8) {
-        const canvas = document.createElement("canvas");
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-            throw new Error("Unable to create a 2D canvas context.");
-        }
-        const stripeWidth = size / stripes;
-        for (let i = 0; i < stripes; i++) {
-            ctx.fillStyle = i % 2 === 0 ? "#2e6f9e" : "#f0f0f0";
-            ctx.fillRect(i * stripeWidth, 0, stripeWidth, size);
-        }
-        return new Texture(gl, canvas);
-    }
-
-    /**
      * Load a texture from an image file, awaiting the image decode.
      * @param {WebGL2RenderingContext} gl
      * @param {string | URL} url Image file URL.
